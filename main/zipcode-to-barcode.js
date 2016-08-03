@@ -1,24 +1,26 @@
 'use strict';
 const _ = require('lodash');
-function translateZipcodeToBarcode(zipcode,allCodes) {
+const loadAllCodes = require('../main/loadAllCodes');
+
+function translateZipcodeToBarcode(zipcode) {
     const result = checkZipcode(zipcode);
-    if(result){
+    if (result) {
         const splittedZipcode = getSplittedZipcode(zipcode);
         const checkDigit = getCheckDigit(splittedZipcode);
-        return getBarcode(checkDigit,allCodes);
+        const allCodes = loadAllCodes();
+        return getBarcode(checkDigit, allCodes);
 
-    }else return '输入不符合要求';
+    } else return false;
 }
 
 function checkZipcode(zipcode) {
-    let splittedZipcode = _.split(zipcode,'');
+    let splittedZipcode = _.split(zipcode, '');
     let length = checkLength(splittedZipcode);
     let dashCount = checkDashCount(splittedZipcode);
     let dashLocation = checkDashLocation(splittedZipcode);
-    let sign = checkSign(splittedZipcode);
     let number = checkPureNumber(splittedZipcode);
 
-    return (length && dashCount && dashLocation && sign && number);
+    return (length && dashCount && dashLocation && number);
 }
 
 function checkLength(splittedZipcode) {
@@ -29,54 +31,47 @@ function checkLength(splittedZipcode) {
 
 function checkDashCount(splittedZipcode) {
     let count = 0;
-    for(let code of splittedZipcode){
-        if(code === '-'){
+    for (let code of splittedZipcode) {
+        if (code === '-') {
             count++;
         }
     }
-    return count <=1;
-
+    return count <= 1;
 }
 
 function checkDashLocation(splittedZipcode) {
-    if(splittedZipcode.length === 10) {
-        let location = _.indexOf(splittedZipcode,'-');
+    if (splittedZipcode.length === 10) {
+        let location = _.indexOf(splittedZipcode, '-');
         return location === 5;
-    }else return true;
-}
-
-function checkSign(splittedZipcode) {
-    if(splittedZipcode.length > 5) {
-        return _.find(splittedZipcode, x => x != '#');
-    }else return true;
+    } else return true;
 }
 
 function checkPureNumber(splittedZipcode) {
-    for(let code of splittedZipcode){
-        if(typeof  parseInt(code) === "number" || code === '-'){
+    for (let code of splittedZipcode) {
+        if (typeof  parseInt(code) === "number" || code === '-') {
             return true;
-        }else return false;
+        } else return false;
     }
 }
 
 function getSplittedZipcode(zipcode) {
-    if(zipcode.length === 5 || zipcode.length === 9){
+    if (zipcode.length === 5 || zipcode.length === 9) {
         return _.chain(zipcode).split('').map(x => parseInt(x)).value();
-    }else {
+    } else {
         return _.chain(zipcode).split('-').join('').split('').map(x => parseInt(x)).value();
     }
 }
 
 function getCheckDigit(splittedZipcode) {
-    let sum = _.reduce(splittedZipcode,(prev,curr) => prev + curr,0);
+    let sum = _.reduce(splittedZipcode, (prev, curr) => prev + curr, 0);
     let digit = sum % 10;
     splittedZipcode.push(digit);
     return splittedZipcode;
 }
 
-function getBarcode(checkDigit,allCodes) {
+function getBarcode(checkDigit, allCodes) {
 
-    let code = _.map(checkDigit,x => allCodes[x]).join('');
+    let code = _.map(checkDigit, x => allCodes[x]).join('');
     return `|${code}|`;
 }
 module.exports = {

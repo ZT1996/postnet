@@ -1,18 +1,18 @@
 'use strict';
 
 const {
-    tanslateBarcodeToZipcode,
+    translateBarcodeToZipcode,
     checkBarcode,
     getSlicedBarcode,
     getZipcode
 } = require('../main/barcode-to-zipcode');
-const loadAllCodes = require('../main/loadAllCodes');
+const loadAllCodes = require('../main/load-all-codes');
 
 describe('barcode to zipcode', () => {
 
     it('输入检验码有问题的编码', () => {
         const barcode = '||:|:::|:|:|:::|:::||::||::|:|||';
-        const output = tanslateBarcodeToZipcode(barcode);
+        const output = translateBarcodeToZipcode(barcode);
 
         const expectText = false;
         expect(output).toEqual(expectText);
@@ -20,7 +20,7 @@ describe('barcode to zipcode', () => {
 
     it('输入编码有问题，不在0-9之间', () => {
         const barcode = '|||||::|:|:|:::|:::||::||::|:|:|';
-        const output = tanslateBarcodeToZipcode(barcode);
+        const output = translateBarcodeToZipcode(barcode);
 
         const expectText = false;
         expect(output).toEqual(expectText);
@@ -28,15 +28,15 @@ describe('barcode to zipcode', () => {
 
     it('输入没有加框架', () => {
         const barcode = '|:|:::|:|:|:::|:::||::||::|:|:';
-        const output = tanslateBarcodeToZipcode(barcode);
+        const output = translateBarcodeToZipcode(barcode);
 
         const expectText = false;
         expect(output).toEqual(expectText);
     });
 
     it('输入位数有问题(5位)', () => {
-        const barcode = '|:|:|:|:::|:::||::||::|:|:|';
-        const output = tanslateBarcodeToZipcode(barcode);
+        const barcode = '|||';
+        const output = translateBarcodeToZipcode(barcode);
 
         const expectText = false;
         expect(output).toEqual(expectText);
@@ -44,7 +44,7 @@ describe('barcode to zipcode', () => {
 
     it('输入位数有问题(9位)', () => {
         const barcode = '|::|:|::||::|::|:|:|::||::|:::||::|:|:|:::|:|:|';
-        const output = tanslateBarcodeToZipcode(barcode);
+        const output = translateBarcodeToZipcode(barcode);
 
         const expectText = false;
         expect(output).toEqual(expectText);
@@ -52,7 +52,7 @@ describe('barcode to zipcode', () => {
 
     it('得到5位的邮编', () => {
         const barcode = '||:|:::|:|:|:::|:::||::||::|:|:|';
-        const output = tanslateBarcodeToZipcode(barcode);
+        const output = translateBarcodeToZipcode(barcode);
 
         const expectText = '95713';
         expect(output).toEqual(expectText);
@@ -60,7 +60,7 @@ describe('barcode to zipcode', () => {
 
     it('得到10位邮编', () => {
         const barcode = '|:::||::|:|::||::|::|:|:|::||::|:::||::|:|:|:::|:|:|';
-        const output = tanslateBarcodeToZipcode(barcode);
+        const output = translateBarcodeToZipcode(barcode);
 
         const expectText = '12345-6789';
         expect(output).toEqual(expectText);

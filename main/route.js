@@ -1,30 +1,40 @@
 "use strict";
-
-let {
-    goToMenuPage
-} = require('../main/command');
+let goToMenuPage = require('../main/command');
 
 let defaultMapping = {
     '*': goToMenuPage
 };
-let mapping = defaultMapping;
 
-function route(input) {
-    let command = mapping[input] || mapping['*'];
-    let response = command(input);
-
-    if (response.err) {
-        return response.err;
-    }
-    if (response.newMapping) {
-        mapping = response.newMapping;
-        return response.text;
-
-    }
-    if (response.reset) {
-        mapping = defaultMapping;
-        return response.text;
+class RouteResponse {
+    constructor({err, text}) {
+        this.err = err;
+        this.text = text;
     }
 }
 
-module.exports = route;
+class Route {
+    constructor() {
+        this.mapping = defaultMapping;
+    }
+
+    handle(input) {
+        let command = this.mapping[input] || this.mapping['*'];
+        let sentence = new command();
+        let response = sentence.run(input);
+
+        if (response.err) {
+            return new RouteResponse({text: response.err});
+        }
+        if (response.newMapping) {
+            this.mapping = response.newMapping;
+            return new RouteResponse({text: response.text});
+        }
+        if (response.reset) {
+            this.mapping = defaultMapping;
+            return new RouteResponse({text: response.text});
+        }
+    }
+}
+
+
+module.exports = Route;

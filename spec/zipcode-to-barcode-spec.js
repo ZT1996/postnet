@@ -7,7 +7,7 @@ const {
     getCheckDigit,
     getBarcode
 } = require('../main/zipcode-to-barcode');
-const loadAllCodes = require('../main/loadAllCodes');
+const loadAllCodes = require('../main/load-all-codes');
 
 describe('zipcode to barcode', () => {
 

@@ -1,70 +1,98 @@
 'use strict';
 let _ = require('lodash');
-const loadAllCodes = require('../main/loadAllCodes');
+const loadAllCodes = require('../main/load-all-codes');
 
-function tanslateBarcodeToZipcode(barcode) {
-    const allCodes = loadAllCodes();
-    const result = checkBarcode(barcode, allCodes);
-    if (result) {
-        const silicedBarcode = getSlicedBarcode(barcode, allCodes);
-        return getZipcode(silicedBarcode);
-
-    } else {
-        return false;
+class BarcodeToZipcodeResponse {
+    constructor({text}) {
+        this.text = text;
     }
 }
 
-function checkBarcode(barcode, allCodes) {
-    let chunckedBarcode = getChunckedBarcode(barcode);
-    let checkDigit = getCheckDigit(chunckedBarcode, allCodes);
-    let checkNumbers = getCheckNumbers(chunckedBarcode, allCodes);
-    let checkCount = getCheckCount(barcode);
-    return (checkDigit && checkNumbers && checkCount);
-}
+class TranslateBarcodeToZipcode {
+    translate(barcode) {
+        let allCodes = loadAllCodes();
 
-function getChunckedBarcode(barcode) {
-    let slicedBarcode = _.slice(barcode, 1, -1);
-    return _.chunk(slicedBarcode, 5).map(x => x.join(''));
+        let result = checkBarcode.check(barcode, allCodes);
 
-}
-
-function getCheckDigit(chunckedBarcode, allCodes) {
-
-    let array = _.map(chunckedBarcode, str => allCodes.indexOf(str));
-    let checkDigit = _.last(array);
-    let checkArray = _.dropRight(array);
-    let realCheckDigit = _.reduce(checkArray, (sum, x) => sum + x, 0) % 10;
-
-    return (realCheckDigit === checkDigit);
-}
-
-function getCheckNumbers(chunckedBarcode, allCodes) {
-    let array = _.map(chunckedBarcode, str => allCodes.indexOf(str));
-    let isExist = _.find(array, x => x === -1);
-    return isExist === undefined;
-}
-
-function getCheckCount(barcode) {
-    return (barcode.length === 32 || barcode.length === 52);
-}
-
-function getSlicedBarcode(barcode, allCodes) {
-
-    let chunckedBarcode = getChunckedBarcode(barcode);
-    return _.map(chunckedBarcode, str => allCodes.indexOf(str));
-
-}
-
-function getZipcode(silicedBarcode) {
-    let dropedBarcode = _.dropRight(silicedBarcode);
-    if (dropedBarcode.length === 9) {
-        return `${_.slice(dropedBarcode, 0, 5).join('')}-${_.slice(dropedBarcode, 5).join('')}`;
+        if (result.text) {
+            let silicedBarcode = getSlicedBarcode.get(barcode, allCodes);
+            let zipcode = getZipcode.get(silicedBarcode.text);
+            return new BarcodeToZipcodeResponse({text: zipcode.text});
+        } else {
+            return new BarcodeToZipcodeResponse({text: false});
+        }
     }
-    else return dropedBarcode.join('');
 }
+
+class CheckBarcode {
+    check(barcode, allCodes) {
+        let chunckedBarcode = getChunckedBarcode.get(barcode);
+        let checkDigit = getCheckDigit.get(chunckedBarcode.text, allCodes);
+        let checkNumbers = getCheckNumbers.get(chunckedBarcode.text, allCodes);
+        let checkCount = getCheckCount.get(barcode);
+        return new BarcodeToZipcodeResponse({text: checkDigit.text && checkNumbers.text && checkCount.text});
+    }
+}
+
+class GetChunckedBarcode {
+    get(barcode) {
+        let slicedBarcode = _.slice(barcode, 1, -1);
+        return new BarcodeToZipcodeResponse({text: _.chunk(slicedBarcode, 5).map(x => x.join(''))});
+    }
+}
+
+class GetCheckDigit {
+    get(chunckedBarcode, allCodes) {
+        let array = _.map(chunckedBarcode, str => allCodes.indexOf(str));
+        let checkDigit = _.last(array);
+        let checkArray = _.dropRight(array);
+        let realCheckDigit = _.reduce(checkArray, (sum, x) => sum + x, 0) % 10;
+
+        return new BarcodeToZipcodeResponse({text: realCheckDigit === checkDigit});
+    }
+}
+
+class GetCheckNumbers {
+    get(chunckedBarcode, allCodes) {
+        let array = _.map(chunckedBarcode, str => allCodes.indexOf(str));
+        let isExist = _.find(array, x => x === -1);
+        return new BarcodeToZipcodeResponse({text: isExist === undefined});
+    }
+}
+
+class GetCheckCount {
+    get(barcode) {
+        return new BarcodeToZipcodeResponse({text: (barcode.length === 32 || barcode.length === 52)});
+    }
+}
+
+class GetSlicedBarcode {
+    get(barcode, allCodes) {
+        let chunckedBarcode = getChunckedBarcode.get(barcode);
+        let result = _.map(chunckedBarcode.text, str => allCodes.indexOf(str));
+        return new BarcodeToZipcodeResponse({text: result});
+    }
+}
+
+class GetZipcode {
+    get(silicedBarcode) {
+        let dropedBarcode = _.dropRight(silicedBarcode);
+        if (dropedBarcode.length === 9) {
+            return new BarcodeToZipcodeResponse({text: `${_.slice(dropedBarcode, 0, 5).join('')}-${_.slice(dropedBarcode, 5).join('')}`});
+        }
+        else return new BarcodeToZipcodeResponse({text: dropedBarcode.join('')});
+    }
+}
+
+
+const checkBarcode = new CheckBarcode();
+const getSlicedBarcode = new GetSlicedBarcode();
+const getZipcode = new GetZipcode();
+const getCheckDigit = new GetCheckDigit();
+const getCheckNumbers = new GetCheckNumbers();
+const getCheckCount = new GetCheckCount();
+const getChunckedBarcode = new GetChunckedBarcode();
+
 module.exports = {
-    tanslateBarcodeToZipcode,
-    checkBarcode,
-    getSlicedBarcode,
-    getZipcode
+    TranslateBarcodeToZipcode
 };

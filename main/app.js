@@ -1,12 +1,12 @@
 "use strict";
-let {TranslateBarcodeToZipcode} = require('../main/barcode-to-zipcode');
-let {TranslateZipcodeToBarcode} = require('../main/zipcode-to-barcode');
 let express = require('express');
 let app = express();
-let translateBarcodeToZipcode = new TranslateBarcodeToZipcode();
-let translateZipcodeToBarcode = new TranslateZipcodeToBarcode();
+
+let {TranslateBarcodeToZipcode} = require('../main/barcode-to-zipcode');
+let {TranslateZipcodeToBarcode} = require('../main/zipcode-to-barcode');
 
 app.get('/zipcode-to-barcode/:id',function (req,res) {
+    let translateZipcodeToBarcode = new TranslateZipcodeToBarcode();
     let barcode = translateZipcodeToBarcode.translate(req.params.id);
     if(barcode.text !== false) {
         res.status(200).send(barcode.text);
@@ -16,6 +16,7 @@ app.get('/zipcode-to-barcode/:id',function (req,res) {
 });
 
 app.get('/barcode-to-zipcode/:id',function (req,res) {
+    let translateBarcodeToZipcode = new TranslateBarcodeToZipcode();
     let zipcode = translateBarcodeToZipcode.translate(req.params.id);
     if(zipcode.text !== false){
         res.status(200).send(zipcode.text);
@@ -24,8 +25,8 @@ app.get('/barcode-to-zipcode/:id',function (req,res) {
     }
 });
 
-app.listen(3000, function () {
-    console.log('Server listening at http://localhost:3000');
+app.listen(4000, function () {
+    console.log('Server listening at http://localhost:4000');
 });
 
 module.exports = app;

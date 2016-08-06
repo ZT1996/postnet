@@ -17,6 +17,10 @@ Please input your choices(1~3)：`);
     else if (choose == 3) {
         process.exit();
     }
+    else {
+        console.log('Please give right input:');
+        inputChoose();
+    }
 }
 
 function zipcodeToBarcode(zipcode) {

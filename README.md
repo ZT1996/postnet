@@ -1,11 +1,10 @@
-postnet client
---------------
-install node package
+#postnet client
+###install node package
  ```npm install```
- execute app.js
+###execute app.js
  ```node app.js
  listen on localhost:3000```
- execute client.js
+###execute client.js
  ```node client.js```
  
 
